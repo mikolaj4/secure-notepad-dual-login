@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 import java.security.GeneralSecurityException;
 import java.util.Base64;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RegisterActivity extends AppCompatActivity {
     private static final String SHARED_FILE_NAME = "Notes";
@@ -43,9 +45,28 @@ public class RegisterActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Fill both fields!", Toast.LENGTH_SHORT).show();
             return;
         }
-
+        if (!validatePassword(password)){
+            Toast.makeText(getApplicationContext(), "Password to short!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        //TU PO TESTACH DODAĆ !validateEmail(email)
+        if (false) {
+            Toast.makeText(getApplicationContext(), "Wrong email format!", Toast.LENGTH_SHORT).show();
+            return;
+        }
         saveNewUser(email, password);
+    }
 
+    private boolean validatePassword(String password){
+        return password.length() >= 5;
+    }
+
+    private boolean validateEmail(String email){
+        final String EMAIL_PATTERN = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+        Matcher matcher = pattern.matcher(email);
+
+        return matcher.matches();
     }
 
     private void saveNewUser(String email, String password) {
