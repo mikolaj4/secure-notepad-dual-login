@@ -13,6 +13,12 @@
         android:theme="@style/Theme.BSMdualnotatnik"
         tools:targetApi="31">
         <activity
+            android:name=".NotesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false" />
+        <activity
             android:name=".LogInPasswordActivity"
             android:exported="false" />
         <activity
