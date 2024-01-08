@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,9 +50,11 @@ public class NotesActivity extends AppCompatActivity {
 
 
         buttonLogout = findViewById(R.id.buttonLogOut);
+        buttonChangePassword = findViewById(R.id.buttonChangePassword);
         buttonAddNote = findViewById(R.id.buttonAddNote);
 
         buttonLogout.setOnClickListener(view -> logOut());
+        buttonChangePassword.setOnClickListener(view -> changePassword());
         buttonAddNote.setOnClickListener(view -> showAddNoteDialog());
     }
 
@@ -59,6 +62,77 @@ public class NotesActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void changePassword(){
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.password_change_dialog, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+        builder.setTitle("Change Password");
+
+        builder.setPositiveButton("Change", ((dialogInterface, i) -> {
+            EditText editTextOldPassword = dialogView.findViewById(R.id.editTextOldPassword);
+            EditText editTextNewPassword = dialogView.findViewById(R.id.editTextNewPassword);
+            EditText editTextConfirmPassword = dialogView.findViewById(R.id.editTextConfirmPassword);
+
+            String oldPassword = editTextOldPassword.getText().toString();
+            String newPassword = editTextNewPassword.getText().toString();
+            String confirmPassword = editTextConfirmPassword.getText().toString();
+
+            if (TextUtils.isEmpty(oldPassword) || TextUtils.isEmpty(newPassword) || TextUtils.isEmpty(confirmPassword)) {
+                Toast.makeText(getApplicationContext(), "Fill out all 3 fields!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!isOldPasswordCorrect(oldPassword)){
+                Toast.makeText(getApplicationContext(), "Old password not correct!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if(!validatePassword(newPassword)){
+                Toast.makeText(getApplicationContext(), "New password to short!", Toast.LENGTH_SHORT).show();
+            }
+            if (newPassword.equals(confirmPassword)){
+                updatePassword(newPassword);
+                Toast.makeText(getApplicationContext(), "Password changed!", Toast.LENGTH_SHORT).show();
+            }else {
+                Toast.makeText(getApplicationContext(), "New passwords dont match!", Toast.LENGTH_SHORT).show();
+            }
+
+        }));
+
+        builder.setNegativeButton("Cancel", ((dialogInterface, i) -> dialogInterface.dismiss()));
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private boolean validatePassword(String password){
+        return password.length() >= 5;
+    }
+
+    private boolean isOldPasswordCorrect(String oldPassword){
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_FILE_NAME, MODE_PRIVATE);
+
+        String oldPasswordCorrectHash = sharedPreferences.getString("password_hash", "error");
+        String passwordSaltString = sharedPreferences.getString("password_salt", "error");
+
+        String enteredOldPasswordHash = Utility.hashCredentail(oldPassword, Utility.stringSaltToBytes(passwordSaltString));
+
+        return oldPasswordCorrectHash.equals(enteredOldPasswordHash);
+    }
+
+    private void updatePassword(String password){
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_FILE_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        byte[] newPasswordSalt = Utility.generateRandomSalt();
+        editor.putString("password_salt", Utility.byteSaltToString(newPasswordSalt));
+
+        String newPasswordHash = Utility.hashCredentail(password, newPasswordSalt);
+        editor.putString("password_hash", newPasswordHash);
+
+        editor.apply();
     }
 
     private void showAddNoteDialog(){

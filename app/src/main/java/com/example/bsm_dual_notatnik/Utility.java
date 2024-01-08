@@ -31,6 +31,14 @@ public class Utility {
         return salt;
     }
 
+    protected static byte[] stringSaltToBytes(String salt){
+        return Base64.getDecoder().decode(salt);
+    }
+
+    protected static String byteSaltToString(byte[] salt){
+        return Base64.getEncoder().encodeToString(salt);
+    }
+
     protected static String hashCredentail(String credential, byte[] salt) {
         KeySpec spec = new PBEKeySpec(credential.toCharArray(), salt, 65536, 128);
         try {

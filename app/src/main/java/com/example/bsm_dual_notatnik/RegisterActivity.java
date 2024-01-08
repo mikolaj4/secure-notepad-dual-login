@@ -29,6 +29,8 @@ public class RegisterActivity extends AppCompatActivity {
 
         buttonRegister.setOnClickListener(view -> registerClicked());
 
+
+
     }
 
 
@@ -79,15 +81,13 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         byte[] emailSalt = Utility.generateRandomSalt();
-        String emailSaltString = Base64.getEncoder().encodeToString(emailSalt);
         String emailHash = Utility.hashCredentail(email, emailSalt);
 
         byte[] passwordSalt = Utility.generateRandomSalt();
-        String passwordSaltString = Base64.getEncoder().encodeToString(passwordSalt);
         String passwordHash = Utility.hashCredentail(password, passwordSalt);
 
-        editor.putString("email_salt", emailSaltString);
-        editor.putString("password_salt", passwordSaltString);
+        editor.putString("email_salt", Utility.byteSaltToString(emailSalt));
+        editor.putString("password_salt", Utility.byteSaltToString(passwordSalt));
         editor.putString("email_hash", emailHash);
         editor.putString("password_hash", passwordHash);
         editor.apply();
